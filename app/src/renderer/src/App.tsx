@@ -6,6 +6,8 @@ import { Stub } from './pages/Stub'
 import { ContainersPage } from './pages/ContainersPage'
 import { ContainerDetail } from './pages/ContainerDetail'
 import { RunPage } from './pages/RunPage'
+import { ImagesPage } from './pages/ImagesPage'
+import { VolumesPage } from './pages/VolumesPage'
 import { fetchContainers } from './store/slices'
 
 const NAV: { name: Route['name']; label: string; icon: 'box' | 'layers' | 'disk' | 'gear' }[] = [
@@ -53,9 +55,9 @@ function Page({ route }: { route: Route }): ReactNode {
     case 'run':
       return <RunPage image={route.image} />
     case 'images':
-      return <Stub title="Images" />
+      return <ImagesPage />
     case 'volumes':
-      return <Stub title="Volumes" />
+      return <VolumesPage />
     case 'settings':
       return <Stub title="Settings" />
   }
