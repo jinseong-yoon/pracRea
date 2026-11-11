@@ -1,0 +1,8 @@
+node_modules
+dist
+out
+extracted
+evidence/main-summary.json
+*.asar
+.eslintcache
+app/.smoke/
