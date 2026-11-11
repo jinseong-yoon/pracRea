@@ -5,6 +5,7 @@ import { BrandMark, Icon, Toasts } from './components/ui'
 import { Stub } from './pages/Stub'
 import { ContainersPage } from './pages/ContainersPage'
 import { ContainerDetail } from './pages/ContainerDetail'
+import { RunPage } from './pages/RunPage'
 import { fetchContainers } from './store/slices'
 
 const NAV: { name: Route['name']; label: string; icon: 'box' | 'layers' | 'disk' | 'gear' }[] = [
@@ -50,7 +51,7 @@ function Page({ route }: { route: Route }): ReactNode {
     case 'container':
       return <ContainerDetail id={route.id} tab={route.tab} />
     case 'run':
-      return <Stub title="Run a container" />
+      return <RunPage image={route.image} />
     case 'images':
       return <Stub title="Images" />
     case 'volumes':
