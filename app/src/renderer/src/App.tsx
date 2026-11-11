@@ -1,11 +1,11 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { actions, useAppDispatch, useAppSelector } from './store'
 import { fetchEngineStatus, fetchSettings, type Route } from './store/slices'
 import { BrandMark, Icon, Toasts } from './components/ui'
-import { Stub } from './pages/Stub'
 import { ContainersPage } from './pages/ContainersPage'
 import { ContainerDetail } from './pages/ContainerDetail'
 import { RunPage } from './pages/RunPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { ImagesPage } from './pages/ImagesPage'
 import { VolumesPage } from './pages/VolumesPage'
 import { fetchContainers } from './store/slices'
@@ -59,7 +59,7 @@ function Page({ route }: { route: Route }): ReactNode {
     case 'volumes':
       return <VolumesPage />
     case 'settings':
-      return <Stub title="Settings" />
+      return <SettingsPage />
   }
 }
 
@@ -76,6 +76,15 @@ export default function App(): ReactNode {
   }, [dispatch])
 
   const connected = engine.status?.connected === true
+
+  // Apply the "show stopped containers" setting once, when settings first arrive (it sets the initial filter).
+  const showStopped = useAppSelector((s) => s.settings.value?.desktop.showStoppedContainers.value)
+  const appliedInitialFilter = useRef(false)
+  useEffect(() => {
+    if (showStopped === undefined || appliedInitialFilter.current) return
+    appliedInitialFilter.current = true
+    if (!showStopped) dispatch(actions.containers.setFilter('running'))
+  }, [showStopped, dispatch])
 
   // Live updates: engine events (via MessageChannel stream) trigger a debounced list refresh.
   useEffect(() => {
