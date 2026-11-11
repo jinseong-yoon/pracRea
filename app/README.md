@@ -1,34 +1,27 @@
-# app
+# BoxDesk
 
-An Electron application with React and TypeScript
+Small container dashboard: Electron + React + TypeScript (electron-vite), dockerode, xterm.js, Redux Toolkit.
+Built from behaviour observed in the analysis in `../ANALYSIS.md`; differences are listed in `../DEVIATIONS.md`.
 
-## Recommended IDE Setup
-
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-
-## Project Setup
-
-### Install
-
-```bash
-$ npm install
+```
+npm install
+npm run dev          # run with hot reload
+npm run build        # typecheck + production build
+npm run test:lib     # pure-function tests (no Docker)
+npm run test:e2e     # build, then drive the real app against your Docker engine (see below)
 ```
 
-### Development
+Requirements: a running Docker engine and the `docker` CLI on PATH (stats are read from `docker stats`).
 
-```bash
-$ npm run dev
-```
+## Layout
 
-### Build
+- `src/shared` — API types and the IPC manifest (single list of endpoints)
+- `src/preload` — builds `window.desktopIpcClient` from the manifest (`invoke` + `{result,error}` unwrap, MessageChannel streams)
+- `src/main` — `ipc.ts` (registration), `docker.ts` (dockerode, engine delegation), `stats.ts`, `streams.ts` (events, logs, exec, pull), `settings.ts`
+- `src/renderer` — React pages, Redux slices, `lib/rows.ts` (compose tree)
 
-```bash
-# For windows
-$ npm run build:win
+## End-to-end checks
 
-# For macOS
-$ npm run build:mac
-
-# For Linux
-$ npm run build:linux
-```
+`scripts/run-all.mjs` creates throw-away `bxt-*` containers/volumes/images, launches the built app with a remote-debugging port,
+drives it over CDP (`scripts/smoke.mjs`, checks in `scripts/checks/`) and removes exactly those fixtures afterwards.
+The prune checks only run when nothing else on the engine is prunable.
