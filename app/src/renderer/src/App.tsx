@@ -4,6 +4,7 @@ import { fetchEngineStatus, fetchSettings, type Route } from './store/slices'
 import { BrandMark, Icon, Toasts } from './components/ui'
 import { Stub } from './pages/Stub'
 import { ContainersPage } from './pages/ContainersPage'
+import { ContainerDetail } from './pages/ContainerDetail'
 import { fetchContainers } from './store/slices'
 
 const NAV: { name: Route['name']; label: string; icon: 'box' | 'layers' | 'disk' | 'gear' }[] = [
@@ -47,7 +48,7 @@ function Page({ route }: { route: Route }): ReactNode {
     case 'containers':
       return <ContainersPage />
     case 'container':
-      return <Stub title="Container details" />
+      return <ContainerDetail id={route.id} tab={route.tab} />
     case 'run':
       return <Stub title="Run a container" />
     case 'images':
@@ -90,6 +91,17 @@ export default function App(): ReactNode {
       clearTimeout(timer)
       sub.unsubscribe()
     }
+  }, [connected, dispatch])
+
+  // Stats: INITIAL/CHUNK/ERROR messages from the main process go straight into the store.
+  useEffect(() => {
+    if (!connected) return
+    dispatch(actions.stats.reset())
+    const sub = window.desktopIpcClient.systemResources.openStatsStream().subscribe({
+      next: (m) => dispatch(actions.stats.message(m)),
+      error: (err) => dispatch(actions.stats.message({ type: 'ERROR_STATS', payload: { error: err.message } }))
+    })
+    return () => sub.unsubscribe()
   }, [connected, dispatch])
 
   const activeNav = route.name === 'container' || route.name === 'run' ? 'containers' : route.name

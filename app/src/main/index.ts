@@ -6,6 +6,7 @@ import { registerIpc, type Handlers } from './ipc'
 import * as engine from './docker'
 import { getSettings, updateSettings, onSettingsChanged } from './settings'
 import { eventsStream } from './streams'
+import { statsStream } from './stats'
 
 const handlers: Handlers = {
   simple: {
@@ -29,7 +30,8 @@ const handlers: Handlers = {
     updateSettings: updateSettings
   },
   stream: {
-    'engine.dockerStreamEvents': eventsStream
+    'engine.dockerStreamEvents': eventsStream,
+    'systemResources.openStatsStream': statsStream
   }
 }
 

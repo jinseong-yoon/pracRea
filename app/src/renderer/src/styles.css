@@ -521,3 +521,13 @@ table.grid tr.selected td.pin {
   gap: 8px;
   margin-top: 16px;
 }
+
+button svg {
+  width: 15px;
+  height: 15px;
+  vertical-align: -3px;
+}
+.caret svg {
+  width: 14px;
+  height: 14px;
+}

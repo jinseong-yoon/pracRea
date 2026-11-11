@@ -2,6 +2,7 @@ import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { actions, useAppDispatch, useAppSelector } from '../store'
 import { fetchContainers, type SortKey } from '../store/slices'
 import { buildRows, type Row } from '../lib/rows'
+import { isCpuHigh } from '../lib/stats'
 import { Confirm, Icon, formatBytes, relativeTime, useAction, useNow } from '../components/ui'
 import type { BulkAction } from '../../../shared/types'
 
@@ -33,7 +34,7 @@ const COLUMNS: Col[] = [
     hideable: true,
     render: (r, { ncpu }) =>
       r.state === 'running' || r.kind === 'project'
-        ? dash(r, <span className={r.cpu > 80 * ncpu ? 'cpu-warn' : ''}>{r.cpu.toFixed(2)}%</span>)
+        ? dash(r, <span className={isCpuHigh(r.cpu, ncpu) ? 'cpu-warn' : ''}>{r.cpu.toFixed(2)}%</span>)
         : '—'
   },
   {
@@ -245,6 +246,16 @@ export function ContainersPage(): ReactNode {
         </button>
       </div>
 
+      {stats.cumulated.length > 0 && (
+        <div className="muted" data-testid="totals" style={{ marginBottom: 8 }}>
+          Total CPU{' '}
+          <strong className={isCpuHigh(stats.cumulated[stats.cumulated.length - 1].cpuPercentage, ncpu) ? 'cpu-warn' : ''}>
+            {stats.cumulated[stats.cumulated.length - 1].cpuPercentage.toFixed(2)}%
+          </strong>{' '}
+          · Memory {formatBytes(stats.cumulated[stats.cumulated.length - 1].memoryUsageBytes)} /{' '}
+          {formatBytes(stats.cumulated[stats.cumulated.length - 1].memoryLimitBytes)}
+        </div>
+      )}
       {c.error && <div className="notice">{c.error}</div>}
       <div className="card table-wrap">
         {rows.length === 0 ? (
