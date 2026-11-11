@@ -5,7 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { registerIpc, type Handlers } from './ipc'
 import * as engine from './docker'
 import { getSettings, updateSettings, onSettingsChanged } from './settings'
-import { eventsStream, logsStream } from './streams'
+import { eventsStream, execStream, logsStream } from './streams'
 import { statsStream } from './stats'
 
 const handlers: Handlers = {
@@ -32,7 +32,8 @@ const handlers: Handlers = {
   stream: {
     'engine.dockerStreamEvents': eventsStream,
     'systemResources.openStatsStream': statsStream,
-    'containers.openContainerLogsStream': logsStream
+    'containers.openContainerLogsStream': logsStream,
+    'containers.containerExec': execStream
   }
 }
 

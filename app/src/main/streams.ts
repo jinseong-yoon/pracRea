@@ -159,5 +159,14 @@ export const execStream: StreamHandler = async (args: { containerId: string }, c
     else if (msg.type === 'resize' && msg.cols && msg.rows)
       exec.resize({ w: msg.cols, h: msg.rows }).catch(() => undefined)
   })
-  return () => stream.end()
+  return () => {
+    // Closing the connection alone leaves the TTY shell running inside the container, so ask it to
+    // quit first (Ctrl-C to interrupt a running command, then `exit`), then drop the connection.
+    try {
+      stream.write('\x03exit\r')
+    } catch {
+      /* connection already gone */
+    }
+    setTimeout(() => stream.destroy(), 300)
+  }
 }

@@ -4,6 +4,7 @@ import { fetchContainers } from '../store/slices'
 import { Confirm, Icon, useAction } from '../components/ui'
 import { StatsPanel } from '../components/StatsPanel'
 import { InspectView, LogsView } from '../components/LogsView'
+import { ExecTerminal } from '../components/ExecTerminal'
 
 type Tab = 'logs' | 'inspect' | 'stats' | 'exec'
 const TABS: { id: Tab; label: string }[] = [
@@ -72,7 +73,8 @@ export function ContainerDetail({ id, tab }: { id: string; tab: Tab }): ReactNod
         (running ? <StatsPanel containerId={id} /> : <div className="empty card">Container is not running.</div>)}
       {tab === 'logs' && <LogsView containerId={id} />}
       {tab === 'inspect' && <InspectView containerId={id} />}
-      {tab === 'exec' && <div className="empty card">Not implemented yet.</div>}
+      {tab === 'exec' &&
+        (running ? <ExecTerminal containerId={id} /> : <div className="empty card">Container is not running.</div>)}
       {confirmDelete && (
         <Confirm
           title={`Delete ${c.name}?`}
