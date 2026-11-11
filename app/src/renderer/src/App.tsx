@@ -3,6 +3,8 @@ import { actions, useAppDispatch, useAppSelector } from './store'
 import { fetchEngineStatus, fetchSettings, type Route } from './store/slices'
 import { BrandMark, Icon, Toasts } from './components/ui'
 import { Stub } from './pages/Stub'
+import { ContainersPage } from './pages/ContainersPage'
+import { fetchContainers } from './store/slices'
 
 const NAV: { name: Route['name']; label: string; icon: 'box' | 'layers' | 'disk' | 'gear' }[] = [
   { name: 'containers', label: 'Containers', icon: 'box' },
@@ -43,7 +45,7 @@ function EngineDown({ error }: { error?: string }): ReactNode {
 function Page({ route }: { route: Route }): ReactNode {
   switch (route.name) {
     case 'containers':
-      return <Stub title="Containers" />
+      return <ContainersPage />
     case 'container':
       return <Stub title="Container details" />
     case 'run':
@@ -70,6 +72,26 @@ export default function App(): ReactNode {
   }, [dispatch])
 
   const connected = engine.status?.connected === true
+
+  // Live updates: engine events (via MessageChannel stream) trigger a debounced list refresh.
+  useEffect(() => {
+    if (!connected) return
+    void dispatch(fetchContainers())
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const sub = window.desktopIpcClient.engine.dockerStreamEvents().subscribe({
+      next: (e) => {
+        if (e.type !== 'container') return
+        clearTimeout(timer)
+        timer = setTimeout(() => void dispatch(fetchContainers()), 250)
+      },
+      error: (err) => dispatch(actions.toast.push('error', `Event stream: ${err.message}`))
+    })
+    return () => {
+      clearTimeout(timer)
+      sub.unsubscribe()
+    }
+  }, [connected, dispatch])
+
   const activeNav = route.name === 'container' || route.name === 'run' ? 'containers' : route.name
 
   return (
